@@ -12,7 +12,7 @@ using Pfizer.hub.job.DTO;
 
 namespace Pfizer.hub.job
 {
-    public class pfeclifesavinghub
+    public class Pfeclifesavinghub
     {
        PfizerstockLoginResponDTO loginRespon;
        private string UpdateDate;
@@ -26,7 +26,7 @@ namespace Pfizer.hub.job
             Password="Aplprim4$1234567890"
         };
 
-        public pfeclifesavinghub(string UpdateDate){
+        public Pfeclifesavinghub(string UpdateDate){
           this.UpdateDate=UpdateDate;
         }
 
@@ -64,13 +64,17 @@ namespace Pfizer.hub.job
             ["getDataByDate"]=this.UpdateDate.ToString()
          };
          var query= QueryHelpers.AddQueryString(StockFeederUrl, param);
+         
          var LifeSavingStock= new List<LifeSavingStockDTO>();
          while(LifeSavingStock.Count<=0){
              try{
                 var responseMessage= await client.PostAsync(query, null);
                 var jsonResponse = await responseMessage.Content.ReadAsStringAsync();
-                var ObjRespon= JsonSerializer.Deserialize<SendStockInformationResponDTO>(jsonResponse);
-                LifeSavingStock=ObjRespon.Data.ToList();
+                if (jsonResponse!=null){
+                    var ObjRespon= JsonSerializer.Deserialize<SendStockInformationResponDTO>(jsonResponse);
+                    LifeSavingStock=ObjRespon.Data.ToList();  
+                }
+                
               }catch (Exception err){
                   Console.WriteLine(err.Message);
                   await Task.Delay(500000);
@@ -102,8 +106,9 @@ namespace Pfizer.hub.job
             var responseMessage= await client.PostAsync(query, jsonContent);
             Console.WriteLine($"Status: {responseMessage.StatusCode}");
             var SResponse= await responseMessage.Content.ReadAsStringAsync();
-            
-            Respon= JsonSerializer.Deserialize<InventoryhubResponDTO>(SResponse);
+            if (SResponse!=null){
+              Respon= JsonSerializer.Deserialize<InventoryhubResponDTO>(SResponse);
+            }
         }catch(Exception err){
             throw err;
         }

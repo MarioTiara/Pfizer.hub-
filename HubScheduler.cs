@@ -24,7 +24,7 @@ namespace Pfizer.hub.job
         public async Task Run(){
             if(_timeSchedule.Contains(DateTime.Now.ToString("hh:mm tt"))){
                  _logger.LogInformation($"Not in Schedule: {DateTime.Now.ToString("hh:mm tt")}");
-                var pfeclifesavinghub= new pfeclifesavinghub("2023-03-02 11:36:06.150");
+                var pfeclifesavinghub= new Pfeclifesavinghub(DateTime.Now.ToString());
                 var SavingStocks= await pfeclifesavinghub.GetSavingStock(); 
                 if (SavingStocks.Count()>0){
                     foreach (var stock in SavingStocks){
