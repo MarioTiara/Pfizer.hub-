@@ -15,9 +15,9 @@ namespace Pfizer.hub.job
 {
     public class Authorization
     {
+       
         private string Token {get;set;}
         private PizerAccount account= new PizerAccount(); 
-        private readonly HttpClient client = new HttpClient();
         private readonly ILogger _logger;
         private string _loginUrl;
         public Authorization (IConfiguration configuration, IServiceProvider services){
@@ -28,6 +28,10 @@ namespace Pfizer.hub.job
         }
 
         public async Task Authorize () {
+            HttpClientHandler clientHandler = new HttpClientHandler();
+            clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
+            HttpClient client = new HttpClient(clientHandler);
+            
            StringContent jsonContent = new(
                 JsonSerializer.Serialize(account),
                 Encoding.UTF8,

@@ -15,7 +15,6 @@ namespace Pfizer.hub.job
 {
     public class SavingHub
     {
-        private HttpClient client= new HttpClient();
         private string _url;
         private readonly ILogger _logger;
         private string _bearerToken ;
@@ -26,6 +25,10 @@ namespace Pfizer.hub.job
         }
 
        public async Task SendStocks(Queue<LifeSavingStockDTO> stocks, string DateUpdate){
+            HttpClientHandler clientHandler = new HttpClientHandler();
+            clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
+            HttpClient client = new HttpClient(clientHandler);
+
             client.DefaultRequestHeaders.Add("Authorization", _bearerToken);
             var param= new Dictionary<string, string>{
             ["DateUpdate"]= DateUpdate
