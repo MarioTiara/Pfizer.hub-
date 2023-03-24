@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Pfizer.hub.job.DTO;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Text.Json;
+using System.Net;
 
 namespace Pfizer.hub.job
 {
@@ -37,11 +38,14 @@ namespace Pfizer.hub.job
          while(stocks.Count<=0){
              try{
                 var responseMessage= await client.PostAsync(query, null);
-                var jsonResponse = await responseMessage.Content.ReadAsStringAsync();
-                if (jsonResponse!=null){
-                    var ObjRespon= JsonSerializer.Deserialize<SendStockInformationResponDTO>(jsonResponse);
-                    foreach (var stock in ObjRespon.Data) stocks.Enqueue(stock);
+                if (responseMessage.StatusCode==HttpStatusCode.OK){
+                    var jsonResponse = await responseMessage.Content.ReadAsStringAsync();
+                    if (jsonResponse!=null){
+                        var ObjRespon= JsonSerializer.Deserialize<SendStockInformationResponDTO>(jsonResponse);
+                        foreach (var stock in ObjRespon.Data) stocks.Enqueue(stock);
+                    }
                 }
+                
               }catch (Exception err){
                   _logger.LogError(err, err.Message);
                   await Task.Delay(10000);

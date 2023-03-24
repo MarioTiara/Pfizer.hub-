@@ -1,3 +1,4 @@
+using System.Net;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,8 +41,9 @@ namespace Pfizer.hub.job
                     var content= BuildContentBody(product);
                     var responseMessage= await client.PostAsync(query, content);
                     var SResponse= await responseMessage.Content.ReadAsStringAsync();
-                    if (SResponse!=null){
-                        var responDTO= JsonSerializer.Deserialize<InventoryhubResponDTO>(SResponse);
+                    InventoryhubResponDTO? responDTO = new InventoryhubResponDTO();
+                    if (responseMessage.StatusCode==HttpStatusCode.OK){
+                        responDTO= JsonSerializer.Deserialize<InventoryhubResponDTO>(SResponse);
                         var dataLog= new {DataRequest=product, Respon=responDTO};
                         _logger.LogInformation(JsonSerializer.Serialize(dataLog));
                     }
