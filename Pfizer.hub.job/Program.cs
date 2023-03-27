@@ -9,29 +9,42 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using System.Collections;
 using System.Text.Json;
+using System.Runtime.InteropServices;
 
 namespace Pfizer.hub.job
 {
     class Program
     {
-        static async Task Main(string[] args)
-        {
-            
+
+    static async Task Main(string[] args)
+    {
+        var configuration = BuildConfig();
+        var BackDate=configuration.GetValue<string>("BackDate");
+        if (!String.IsNullOrWhiteSpace(BackDate)){
+            string[] DateUpdate=BackDate.Split("|");
+            foreach (var d in DateUpdate){
+                await run (d);
+            }
+
+        }else{
+          await run (DateTime.Now.ToString());
+        }
+       
+    }
+        
+        public static async Task run (string DateUpdate){
+            Console.WriteLine("run");
             var configuration = BuildConfig();
             var serviceCollection= BuildServiceCollection(configuration);
-          
-            
             var auth= new Authorization(configuration, serviceCollection);
             await auth.Authorize();
 
             string Token= await auth.GetBeareToken();
-            string DateUpdate= DateTime.Now.ToString();
             var PizerStock= new PizerStock(configuration, serviceCollection, Token);
             var Stocks= await PizerStock.GetSavingStock(DateUpdate);
             var SavingHub= new SavingHub(configuration, serviceCollection, Token);
             await SavingHub.SendStocks(Stocks, DateUpdate);
         }
-
         public static  IConfigurationRoot BuildConfig(){
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appSettings.json", true, true)
