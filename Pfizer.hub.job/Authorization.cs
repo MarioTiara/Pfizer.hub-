@@ -45,9 +45,15 @@ namespace Pfizer.hub.job
                     var jsonResponse = await responseMessage.Content.ReadAsStringAsync();
                     loginRespon= JsonSerializer.Deserialize<PfizerstockLoginResponDTO>(jsonResponse);
                     loginRespon.Success=responseMessage.StatusCode.Equals(HttpStatusCode.OK);
+                    var logger =JsonSerializer.Serialize(new {
+                        statusCode=responseMessage.StatusCode,
+                        Content=loginRespon
+                    });
+
+                    _logger.LogInformation($"Login Request -{logger} ");
                 }catch (Exception err){
                   await Task.Delay(1000);
-                  Console.WriteLine(err.Message);
+                  _logger.LogError(err, err.Message);
                 }
             }
 

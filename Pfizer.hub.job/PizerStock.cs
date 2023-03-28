@@ -38,6 +38,7 @@ namespace Pfizer.hub.job
          while(stocks.Count<=0){
              try{
                 var responseMessage= await client.PostAsync(query, null);
+                _logger.LogInformation($"StockFeeder - Status Code: {responseMessage.StatusCode}");
                 if (responseMessage.StatusCode==HttpStatusCode.OK){
                     var jsonResponse = await responseMessage.Content.ReadAsStringAsync();
                     if (jsonResponse!=null){
