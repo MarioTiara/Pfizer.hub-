@@ -29,17 +29,12 @@ namespace Pfizer.hub.job
             HttpClientHandler clientHandler = new HttpClientHandler();
             clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
             HttpClient client = new HttpClient(clientHandler);
-
             client.DefaultRequestHeaders.Add("Authorization", _bearerToken);
-            var param= new Dictionary<string, string>{
-            ["DateUpdate"]= DateUpdate
-            };
-            var query= QueryHelpers.AddQueryString(_url, param);
             while (stocks.Count>0){
                 try{
                     var product= stocks.Dequeue();
                     var content= BuildContentBody(product);
-                    var responseMessage= await client.PostAsync(query, content);
+                    var responseMessage= await client.PostAsync(_url, content);
                     var SResponse= await responseMessage.Content.ReadAsStringAsync();
                     InventoryhubResponDTO? responDTO = new InventoryhubResponDTO();
                     if (responseMessage.StatusCode==HttpStatusCode.OK){
