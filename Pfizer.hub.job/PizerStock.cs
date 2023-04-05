@@ -44,7 +44,13 @@ namespace Pfizer.hub.job
                     if (jsonResponse!=null){
                         var ObjRespon= JsonSerializer.Deserialize<SendStockInformationResponDTO>(jsonResponse);
                         _logger.LogInformation($"StockFeeder Respon: {ObjRespon}");
-                        foreach (var stock in ObjRespon.Data) stocks.Enqueue(stock);
+                        if (ObjRespon.Data.Count()>0){
+                            foreach (var stock in ObjRespon.Data) stocks.Enqueue(stock);
+                        }else{
+                            _logger.LogWarning($"StockFeeder in Date: {DateUpdate} = {ObjRespon.Data.Count()}");
+                            break;
+                        }
+                        
                     }
                 }else{
                     _logger.LogWarning($"Failed to get stock from API, Respon: {responseMessage.StatusCode}");
