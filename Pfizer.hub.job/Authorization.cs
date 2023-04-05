@@ -42,15 +42,21 @@ namespace Pfizer.hub.job
                   try
                   {
                     responseMessage = await client.PostAsync(_loginUrl, jsonContent);
-                    var jsonResponse = await responseMessage.Content.ReadAsStringAsync();
-                    loginRespon= JsonSerializer.Deserialize<PfizerstockLoginResponDTO>(jsonResponse);
-                    loginRespon.Success=responseMessage.StatusCode.Equals(HttpStatusCode.OK);
-                    var logger =JsonSerializer.Serialize(new {
-                        statusCode=responseMessage.StatusCode,
-                        Content=loginRespon
-                    });
-
-                    _logger.LogInformation($"Login Request -{logger} ");
+                    if (responseMessage.IsSuccessStatusCode){
+                        var jsonResponse = await responseMessage.Content.ReadAsStringAsync();
+                        loginRespon= JsonSerializer.Deserialize<PfizerstockLoginResponDTO>(jsonResponse);
+                        loginRespon.Success=responseMessage.StatusCode.Equals(HttpStatusCode.OK);
+                        var logger =JsonSerializer.Serialize(new {
+                            statusCode=responseMessage.StatusCode,
+                            Content=loginRespon
+                        });
+                        _logger.LogInformation($"Login Request -{logger} ");
+                    }else{
+                        _logger.LogWarning($"Failed to get token from API, Respon: {responseMessage.StatusCode}");
+                        loginRespon.Success=false;
+                        await Task.Delay(1000);
+                    }
+                    
                 }catch (Exception err){
                   await Task.Delay(1000);
                   _logger.LogError(err, err.Message);

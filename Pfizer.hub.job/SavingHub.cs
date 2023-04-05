@@ -35,15 +35,22 @@ namespace Pfizer.hub.job
                     var product= stocks.Dequeue();
                     var content= BuildContentBody(product);
                     var responseMessage= await client.PostAsync(_url, content);
-                    var SResponse= await responseMessage.Content.ReadAsStringAsync();
-                    InventoryhubResponDTO? responDTO = new InventoryhubResponDTO();
+
+                    _logger.LogInformation($"SavingHUb - Status Code: {responseMessage.StatusCode}");
+
                     if (responseMessage.StatusCode==HttpStatusCode.OK){
+                        var SResponse= await responseMessage.Content.ReadAsStringAsync();
+                        InventoryhubResponDTO? responDTO = new InventoryhubResponDTO();
                         responDTO= JsonSerializer.Deserialize<InventoryhubResponDTO>(SResponse);
                         var dataLog= new {DataRequest=product, Respon=responDTO};
                         _logger.LogInformation(JsonSerializer.Serialize(dataLog));
+                    }else{
+                         _logger.LogWarning($"Failed to post product from API, Respon: {responseMessage.StatusCode}");
+                         await Task.Delay(1000);
                     }
                 }catch (Exception err){
                     _logger.LogError(err, err.Message);
+                    await Task.Delay(1000);
                 }
                 
             }
