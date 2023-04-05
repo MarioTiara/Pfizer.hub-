@@ -43,6 +43,7 @@ namespace Pfizer.hub.job
                     var jsonResponse = await responseMessage.Content.ReadAsStringAsync();
                     if (jsonResponse!=null){
                         var ObjRespon= JsonSerializer.Deserialize<SendStockInformationResponDTO>(jsonResponse);
+                        _logger.LogInformation($"StockFeeder Respon: {ObjRespon}");
                         foreach (var stock in ObjRespon.Data) stocks.Enqueue(stock);
                     }
                 }else{
