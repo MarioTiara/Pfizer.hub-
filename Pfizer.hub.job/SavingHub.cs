@@ -25,9 +25,11 @@ namespace Pfizer.hub.job
             _bearerToken= Token;
         }
 
-       public async Task SendStocks(Queue<LifeSavingStockDTO> stocks, string DateUpdate){
+       public async Task SendStocks(Queue<LifeSavingStockDTO> stocks, string DateUpdate,  bool production=true){
             HttpClientHandler clientHandler = new HttpClientHandler();
-            clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
+            if (production!=true){
+                 clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
+            }
             HttpClient client = new HttpClient(clientHandler);
             client.DefaultRequestHeaders.Add("Authorization", _bearerToken);
             while (stocks.Count>0){

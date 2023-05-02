@@ -20,15 +20,17 @@ namespace Pfizer.hub.job
     {
         var configuration = BuildConfig();
         var BackDate=configuration.GetValue<string>("BackDate");
-        if (!String.IsNullOrWhiteSpace(BackDate)){
-            string[] DateUpdate=BackDate.Split("|");
-            foreach (var d in DateUpdate){
-                await run (d);
-            }
+        // if (!String.IsNullOrWhiteSpace(BackDate)){
+        //     string[] DateUpdate=BackDate.Split("|");
+        //     foreach (var d in DateUpdate){
+        //         await run (d);
+        //     }
 
-        }else{
-          await run (DateTime.Now.ToString());
-        }
+        // }else{
+        //   await run (DateTime.Now.ToString());
+        // }
+
+        Console.WriteLine(isProducton(configuration));
        
     }
         
@@ -36,14 +38,15 @@ namespace Pfizer.hub.job
             Console.WriteLine("run");
             var configuration = BuildConfig();
             var serviceCollection= BuildServiceCollection(configuration);
+            var isproducton=isProducton(configuration);
             var auth= new Authorization(configuration, serviceCollection);
-            await auth.Authorize();
+            await auth.Authorize(isproducton);
 
             string Token= await auth.GetBeareToken();
             var PizerStock= new PizerStock(configuration, serviceCollection, Token);
-            var Stocks= await PizerStock.GetSavingStock(DateUpdate);
+            var Stocks= await PizerStock.GetSavingStock(DateUpdate, isproducton);
             var SavingHub= new SavingHub(configuration, serviceCollection, Token);
-            await SavingHub.SendStocks(Stocks, DateUpdate);
+            await SavingHub.SendStocks(Stocks, DateUpdate, isproducton);
         }
         public static  IConfigurationRoot BuildConfig(){
             var configuration = new ConfigurationBuilder()
@@ -61,6 +64,11 @@ namespace Pfizer.hub.job
                         .CreateLogger()))
                 .BuildServiceProvider();
             return  serviceCollection;
+        }
+
+        private static bool isProducton(IConfiguration configuration){
+             var env=configuration.GetValue<string>("Env");
+             return env.Equals("Production");
         }
     }
 }
